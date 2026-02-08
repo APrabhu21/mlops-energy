@@ -1,0 +1,65 @@
+name: Data Ingestion & Drift Detection
+
+on:
+  schedule:
+    # Run every 6 hours for data ingestion
+    - cron: '0 */6 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  data-ingestion:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+        
+    - name: Install dependencies
+      run: |
+        pip install -q -r requirements.txt
+        
+    - name: Run data ingestion
+      env:
+        EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
+      run: |
+        python -c "
+        from src.data.eia_api import fetch_demand_data
+        from src.data.weather_api import fetch_weather_data
+        from src.data.features import build_features
+        from datetime import datetime, timedelta
+        from src.config import RAW_DIR, PROCESSED_DIR
+        
+        # Fetch last 7 days
+        end = datetime.utcnow()
+        start = end - timedelta(days=7)
+        
+        # Fetch data
+        demand_df = fetch_demand_data(
+            start.strftime('%Y-%m-%dT%H'),
+            end.strftime('%Y-%m-%dT%H')
+        )
+        weather_df = fetch_weather_data(
+            start.strftime('%Y-%m-%d'),
+            end.strftime('%Y-%m-%d')
+        )
+        
+        # Build features
+        features_df = build_features(demand_df, weather_df)
+        
+        # Save
+        features_df.to_parquet(PROCESSED_DIR / 'features.parquet', index=False)
+        print(f'✓ Saved {len(features_df)} feature rows')
+        "
+        
+    - name: Upload feature data
+      uses: actions/upload-artifact@v4
+      with:
+        name: features
+        path: data/processed/features.parquet
+        retention-days: 30

@@ -1,0 +1,110 @@
+name: Drift Detection & Retraining
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_retrain: ${{ steps.drift.outputs.should_retrain }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+        
+    - name: Install dependencies
+      run: pip install -q -r requirements.txt
+      
+    - name: Download latest features
+      uses: actions/download-artifact@v4
+      with:
+        name: features
+        path: data/processed/
+        
+    - name: Check drift
+      id: drift
+      run: |
+        python -c "
+        import pandas as pd
+        from src.monitoring.drift_detection import run_drift_check, save_drift_results
+        
+        ref = pd.read_parquet('data/reference/reference_features.parquet')
+        cur = pd.read_parquet('data/processed/features.parquet')
+        
+        should_retrain, drift_share, details = run_drift_check(ref, cur)
+        save_drift_results(details, 'reports/drift_results.json')
+        
+        print(f'Drift: {drift_share:.1%}')
+        print(f'should_retrain={should_retrain}')
+        
+        # Set output for next job
+        with open('${GITHUB_OUTPUT}', 'a') as f:
+            f.write(f'should_retrain={str(should_retrain).lower()}\n')
+        "
+        
+    - name: Upload drift report
+      uses: actions/upload-artifact@v4
+      with:
+        name: drift-report
+        path: reports/drift_results.json
+        
+  retrain:
+    needs: drift-check
+    if: needs.drift-check.outputs.should_retrain == 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+        
+    - name: Install dependencies
+      run: pip install -q -r requirements.txt
+      
+    - name: Download features
+      uses: actions/download-artifact@v4
+      with:
+        name: features
+        path: data/processed/
+        
+    - name: Retrain model
+      run: |
+        python -c "
+        from src.model.train import train_model
+        from src.model.registry import promote_to_champion
+        import pandas as pd
+        
+        features = pd.read_parquet('data/processed/features.parquet')
+        
+        # Train new model
+        run_id, metrics = train_model(
+            features,
+            target_col='demand_mwh',
+            experiment_name='energy-demand-auto-retrain'
+        )
+        
+        print(f'Trained model {run_id}')
+        print(f'Metrics: {metrics}')
+        
+        # Try to promote
+        promoted = promote_to_champion(run_id)
+        if promoted:
+            print('✓ New champion model!')
+        else:
+            print('Model not better than current champion')
+        "

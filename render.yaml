@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: energy-demand-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn src.serving.app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: EIA_API_KEY
+        sync: false  # Add in Render dashboard
+      - key: MLFLOW_TRACKING_URI
+        value: sqlite:///mlflow.db
+    autoDeploy: true
+    
+  - type: pserv
+    name: energy-demand-mlflow
+    runtime: python
+    buildCommand: pip install mlflow
+    startCommand: mlflow server --host 0.0.0.0 --port $PORT --backend-store-uri sqlite:///mlflow.db
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    autoDeploy: true
