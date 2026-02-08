@@ -100,6 +100,20 @@ def load_drift_results():
     return None
 
 
+@st.cache_data(ttl=300)
+def load_performance_log():
+    """Load performance monitoring log."""
+    perf_path = Path("reports/performance_log.json")
+    if perf_path.exists():
+        with open(perf_path, 'r') as f:
+            data = json.load(f)
+            if 'entries' in data and data['entries']:
+                df = pd.DataFrame(data['entries'])
+                df['timestamp'] = pd.to_datetime(df['timestamp'])
+                return df
+    return None
+
+
 def get_model_info():
     """Get champion model information (non-blocking)."""
     try:
@@ -260,6 +274,46 @@ def create_error_distribution(df):
     return fig
 
 
+def create_performance_trends(perf_df):
+    """Create performance metrics over time chart."""
+    if perf_df is None or len(perf_df) == 0:
+        return None
+    
+    fig = go.Figure()
+    
+    # MAE trend
+    fig.add_trace(go.Scatter(
+        x=perf_df['timestamp'],
+        y=perf_df['mae'],
+        mode='lines+markers',
+        name='MAE',
+        line=dict(color='#1f77b4', width=2),
+        yaxis='y'
+    ))
+    
+    # R² trend (on secondary axis)
+    fig.add_trace(go.Scatter(
+        x=perf_df['timestamp'],
+        y=perf_df['r2'],
+        mode='lines+markers',
+        name='R²',
+        line=dict(color='#2ca02c', width=2),
+        yaxis='y2'
+    ))
+    
+    fig.update_layout(
+        title="Model Performance Over Time",
+        xaxis_title="Date",
+        yaxis=dict(title="MAE (MWh)", side='left'),
+        yaxis2=dict(title="R² Score", side='right', overlaying='y'),
+        height=350,
+        hovermode='x unified',
+        legend=dict(x=0.01, y=0.99)
+    )
+    
+    return fig
+
+
 def main():
     """Main dashboard application."""
     
@@ -286,6 +340,7 @@ def main():
     reference_df = load_reference_data()
     drift_results = load_drift_results()
     model_info = get_model_info()
+    perf_log = load_performance_log()
     
     # System status indicators
     if features_df is not None:
@@ -392,7 +447,28 @@ def main():
         else:
             st.info("Predictions not available")
     
-    # Row 4: Data Tables
+    # Row 4: Performance Trends
+    if perf_log is not None and len(perf_log) > 1:
+        st.markdown("---")
+        st.markdown("### 📈 Model Performance Trends")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        latest = perf_log.iloc[-1]
+        
+        with col1:
+            st.metric("Current MAE", f"{latest['mae']:,.0f} MWh")
+        with col2:
+            st.metric("Current R²", f"{latest['r2']:.3f}")
+        with col3:
+            st.metric("Current MAPE", f"{latest['mape']:.1f}%")
+        with col4:
+            st.metric("Measurements", len(perf_log))
+        
+        perf_chart = create_performance_trends(perf_log)
+        if perf_chart:
+            st.plotly_chart(perf_chart, use_container_width=True)
+    
+    # Row 5: Data Tables
     st.markdown("---")
     st.markdown("### 📋 Recent Data")
     

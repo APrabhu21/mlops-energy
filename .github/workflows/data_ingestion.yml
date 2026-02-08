@@ -53,11 +53,14 @@ jobs:
         MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
       run: python src/scripts/run_predictions.py
     
+    - name: Monitor model performance
+      run: python src/scripts/monitor_performance.py
+    
     - name: Commit updated data
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add data/processed/features.parquet
+        git add data/processed/features.parquet reports/performance_log.json
         git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update: new data and predictions [skip ci]" && git push)
         
     - name: Upload feature data with predictions
