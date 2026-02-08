@@ -42,8 +42,15 @@ jobs:
       env:
         EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
       run: python src/scripts/run_data_ingestion.py
+    
+    - name: Generate predictions
+      env:
+        MLFLOW_TRACKING_URI: https://dagshub.com/atharvaprabhu6/mlops-energy.mlflow
+        MLFLOW_TRACKING_USERNAME: atharvaprabhu6
+        MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
+      run: python src/scripts/run_predictions.py
         
-    - name: Upload feature data
+    - name: Upload feature data with predictions
       uses: actions/upload-artifact@v4
       with:
         name: features
