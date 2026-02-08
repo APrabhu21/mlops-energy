@@ -2,18 +2,25 @@
 Run data ingestion pipeline for GitHub Actions or manual execution.
 """
 import sys
+import os
 from pathlib import Path
 
 # Add project root to Python path
-project_root = Path(__file__).parent.parent.parent
+project_root = Path(__file__).parent.parent.parent.resolve()
 sys.path.insert(0, str(project_root))
+
+# Debug: Print paths
+print(f"Script location: {__file__}")
+print(f"Project root: {project_root}")
+print(f"sys.path[0]: {sys.path[0]}")
+print(f"src exists: {(project_root / 'src').exists()}")
 
 from datetime import datetime, timedelta
 import pandas as pd
 
-from src.data.eia_api import fetch_demand_data
-from src.data.weather_api import fetch_weather_data
-from src.data.features import build_features
+from src.data.eia_client import EIAClient
+from src.data.weather_client import WeatherClient
+from src.data.feature_engineering import build_features
 from src.config import RAW_DIR, PROCESSED_DIR
 
 
@@ -25,14 +32,16 @@ def main():
     print(f"Fetching data from {start} to {end}...")
     
     # Fetch demand data
-    demand_df = fetch_demand_data(
+    eia_client = EIAClient()
+    demand_df = eia_client.fetch_demand(
         start.strftime('%Y-%m-%dT%H'),
         end.strftime('%Y-%m-%dT%H')
     )
     print(f"✓ Fetched {len(demand_df)} demand records")
     
     # Fetch weather data
-    weather_df = fetch_weather_data(
+    weather_client = WeatherClient()
+    weather_df = weather_client.fetch_historical(
         start.strftime('%Y-%m-%d'),
         end.strftime('%Y-%m-%d')
     )
