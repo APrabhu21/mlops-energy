@@ -67,7 +67,7 @@ jobs:
     if: needs.drift-check.outputs.should_retrain == 'true'
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       actions: write
     
     steps:
@@ -98,3 +98,17 @@ jobs:
         MLFLOW_TRACKING_USERNAME: atharvaprabhu6
         MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
       run: python src/scripts/run_retraining.py
+    
+    - name: Regenerate predictions with new champion model
+      env:
+        MLFLOW_TRACKING_URI: https://dagshub.com/atharvaprabhu6/mlops-energy.mlflow
+        MLFLOW_TRACKING_USERNAME: atharvaprabhu6
+        MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
+      run: python src/scripts/run_predictions.py
+    
+    - name: Commit updated predictions
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add data/processed/features.parquet reports/drift_results.json
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update: regenerate predictions after retraining [skip ci]" && git push)

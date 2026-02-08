@@ -10,7 +10,7 @@ jobs:
   data-ingestion:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       actions: write
     
     steps:
@@ -43,12 +43,22 @@ jobs:
         EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
       run: python src/scripts/run_data_ingestion.py
     
+    - name: Check data quality
+      run: python src/scripts/check_data_quality.py
+    
     - name: Generate predictions
       env:
         MLFLOW_TRACKING_URI: https://dagshub.com/atharvaprabhu6/mlops-energy.mlflow
         MLFLOW_TRACKING_USERNAME: atharvaprabhu6
         MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
       run: python src/scripts/run_predictions.py
+    
+    - name: Commit updated data
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add data/processed/features.parquet
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update: new data and predictions [skip ci]" && git push)
         
     - name: Upload feature data with predictions
       uses: actions/upload-artifact@v4
