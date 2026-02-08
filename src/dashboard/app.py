@@ -26,6 +26,7 @@ if hasattr(st, 'secrets') and 'mlflow' in st.secrets:
     os.environ['MLFLOW_TRACKING_URI'] = mlflow_config.get('MLFLOW_TRACKING_URI', '')
     os.environ['MLFLOW_TRACKING_USERNAME'] = mlflow_config.get('DAGSHUB_USER', '')
     os.environ['MLFLOW_TRACKING_PASSWORD'] = mlflow_config.get('DAGSHUB_TOKEN', '')
+    os.environ['MLFLOW_HTTP_REQUEST_TIMEOUT'] = '10'  # 10 second timeout
     mlflow.set_tracking_uri(mlflow_config['MLFLOW_TRACKING_URI'])
 
 # Page config
@@ -99,15 +100,18 @@ def load_drift_results():
     return None
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=60, show_spinner="Loading model info...")
 def get_model_info():
-    """Get champion model information."""
+    """Get champion model information (non-blocking)."""
     try:
+        # Quick check if MLflow tracking URI is configured
+        tracking_uri = mlflow.get_tracking_uri()
+        
         # Try to connect to MLflow (DagsHub or local)
         client = mlflow.MlflowClient()
         
         # Get latest version
-        versions = client.search_model_versions(f"name='energy-demand-lgbm'")
+        versions = client.search_model_versions("name='energy-demand-lgbm'", max_results=5)
         if versions:
             latest = max(versions, key=lambda x: int(x.version))
             run = client.get_run(latest.run_id)
@@ -123,7 +127,7 @@ def get_model_info():
             }
         return None
     except Exception as e:
-        st.warning(f"Could not load model info: {str(e)}")
+        # Don't block the dashboard if MLflow fails
         return None
 
 
