@@ -79,6 +79,7 @@ data/reference/*
 # Reports
 reports/*.html
 reports/*.json
+!reports/performance_log.json
 
 # Logs
 *.log
