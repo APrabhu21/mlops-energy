@@ -13,6 +13,7 @@ import pandas as pd
 from src.model.train import train_model
 from src.model.registry import promote_to_champion
 from src.config import PROCESSED_DIR
+import shutil
 
 
 def main():
@@ -39,8 +40,17 @@ def main():
     
     if promoted:
         print("✓ New champion model promoted!")
+        
+        # Update reference data with current training data
+        reference_dir = project_root / 'data' / 'reference'
+        reference_dir.mkdir(parents=True, exist_ok=True)
+        reference_path = reference_dir / 'reference_features.parquet'
+        
+        print(f"Updating reference data at {reference_path}...")
+        shutil.copy2(features_path, reference_path)
+        print("✓ Reference data updated with new training data")
     else:
-        print("○ Model not better than current champion")
+        print("○ Model not better than current champion - keeping existing reference data")
 
 
 if __name__ == "__main__":

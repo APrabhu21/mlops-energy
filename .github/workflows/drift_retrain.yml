@@ -119,5 +119,5 @@ jobs:
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add data/processed/features.parquet reports/drift_results.json reports/performance_log.json
+        git add data/processed/features.parquet data/reference/reference_features.parquet reports/drift_results.json reports/performance_log.json
         git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update: regenerate predictions after retraining [skip ci]" && git push)
