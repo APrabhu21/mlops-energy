@@ -34,24 +34,10 @@ jobs:
         
     - name: Check drift
       id: drift
+      env:
+        PYTHONPATH: ${{ github.workspace }}
       run: |
-        python -c "
-        import pandas as pd
-        from src.monitoring.drift_detection import run_drift_check, save_drift_results
-        
-        ref = pd.read_parquet('data/reference/reference_features.parquet')
-        cur = pd.read_parquet('data/processed/features.parquet')
-        
-        should_retrain, drift_share, details = run_drift_check(ref, cur)
-        save_drift_results(details, 'reports/drift_results.json')
-        
-        print(f'Drift: {drift_share:.1%}')
-        print(f'should_retrain={should_retrain}')
-        
-        # Set output for next job
-        with open('${GITHUB_OUTPUT}', 'a') as f:
-            f.write(f'should_retrain={str(should_retrain).lower()}\n')
-        "
+        python -c "import pandas as pd; from src.monitoring.drift_detection import run_drift_check, save_drift_results; ref = pd.read_parquet('data/reference/reference_features.parquet'); cur = pd.read_parquet('data/processed/features.parquet'); should_retrain, drift_share, details = run_drift_check(ref, cur); save_drift_results(details, 'reports/drift_results.json'); print(f'Drift: {drift_share:.1%}'); print(f'should_retrain={should_retrain}'); f = open('${GITHUB_OUTPUT}', 'a'); f.write(f'should_retrain={str(should_retrain).lower()}\n'); f.close()"
         
     - name: Upload drift report
       uses: actions/upload-artifact@v4
@@ -91,28 +77,6 @@ jobs:
         DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
         MLFLOW_TRACKING_USERNAME: atharvaprabhu6
         MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
+        PYTHONPATH: ${{ github.workspace }}
       run: |
-        python -c "
-        from src.model.train import train_model
-        from src.model.registry import promote_to_champion
-        import pandas as pd
-        
-        features = pd.read_parquet('data/processed/features.parquet')
-        
-        # Train new model
-        run_id, metrics = train_model(
-            features,
-            target_col='demand_mwh',
-            experiment_name='energy-demand-auto-retrain'
-        )
-        
-        print(f'Trained model {run_id}')
-        print(f'Metrics: {metrics}')
-        
-        # Try to promote
-        promoted = promote_to_champion(run_id)
-        if promoted:
-            print('✓ New champion model!')
-        else:
-            print('Model not better than current champion')
-        "
+        python -c "from src.model.train import train_model; from src.model.registry import promote_to_champion; import pandas as pd; features = pd.read_parquet('data/processed/features.parquet'); run_id, metrics = train_model(features, target_col='demand_mwh', experiment_name='energy-demand-auto-retrain'); print(f'Trained model {run_id}'); print(f'Metrics: {metrics}'); promoted = promote_to_champion(run_id); print('✓ New champion model!' if promoted else 'Model not better than current champion')"
