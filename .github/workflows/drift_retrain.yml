@@ -9,6 +9,9 @@ on:
 jobs:
   drift-check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     outputs:
       should_retrain: ${{ steps.drift.outputs.should_retrain }}
     
@@ -24,6 +27,16 @@ jobs:
         
     - name: Install dependencies
       run: pip install -q -r requirements.txt
+    
+    - name: Verify secrets
+      run: |
+        if [ -z "$DAGSHUB_TOKEN" ]; then
+          echo "WARNING: DAGSHUB_TOKEN is not set (needed for retrain)"
+        else
+          echo "✓ DAGSHUB_TOKEN is configured (length: ${#DAGSHUB_TOKEN})"
+        fi
+      env:
+        DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
       
     - name: Download latest features (or use committed data)
       continue-on-error: true
@@ -46,6 +59,9 @@ jobs:
     needs: drift-check
     if: needs.drift-check.outputs.should_retrain == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     
     steps:
     - name: Checkout code

@@ -9,6 +9,9 @@ on:
 jobs:
   data-ingestion:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     
     steps:
     - name: Checkout code
@@ -23,6 +26,17 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -q -r requirements.txt
+    
+    - name: Verify secrets
+      run: |
+        if [ -z "$EIA_API_KEY" ]; then
+          echo "ERROR: EIA_API_KEY is not set"
+          exit 1
+        else
+          echo "✓ EIA_API_KEY is configured (length: ${#EIA_API_KEY})"
+        fi
+      env:
+        EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
         
     - name: Run data ingestion
       env:
