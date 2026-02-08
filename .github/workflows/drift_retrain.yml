@@ -38,12 +38,15 @@ jobs:
       env:
         DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
       
-    - name: Download latest features (or use committed data)
-      continue-on-error: true
-      uses: actions/download-artifact@v4
-      with:
-        name: features
-        path: data/processed/
+    - name: Check for existing features data
+      run: |
+        if [ -f "data/processed/features.parquet" ]; then
+          echo "✓ Using committed features.parquet"
+          ls -lh data/processed/features.parquet
+        else
+          echo "✗ No features data found - need to run data ingestion first"
+          exit 1
+        fi
     
     - name: Generate predictions for drift check
       env:
@@ -83,12 +86,15 @@ jobs:
     - name: Install dependencies
       run: pip install -q -r requirements.txt
       
-    - name: Download features (or use committed data)
-      continue-on-error: true
-      uses: actions/download-artifact@v4
-      with:
-        name: features
-        path: data/processed/
+    - name: Check for existing features data
+      run: |
+        if [ -f "data/processed/features.parquet" ]; then
+          echo "✓ Using committed features.parquet"
+          ls -lh data/processed/features.parquet
+        else
+          echo "✗ No features data found - need to run data ingestion first"
+          exit 1
+        fi
         
     - name: Retrain model
       env:
