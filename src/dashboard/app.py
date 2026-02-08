@@ -100,34 +100,40 @@ def load_drift_results():
     return None
 
 
-@st.cache_data(ttl=60, show_spinner="Loading model info...")
 def get_model_info():
     """Get champion model information (non-blocking)."""
     try:
-        # Quick check if MLflow tracking URI is configured
+        # Check if MLflow is configured
         tracking_uri = mlflow.get_tracking_uri()
         
-        # Try to connect to MLflow (DagsHub or local)
-        client = mlflow.MlflowClient()
+        # If no tracking URI, show helpful message
+        if not tracking_uri or 'file:' in tracking_uri:
+            st.info("ℹ️ Add MLflow secrets to see model info")
+            return None
         
-        # Get latest version
-        versions = client.search_model_versions("name='energy-demand-lgbm'", max_results=5)
-        if versions:
-            latest = max(versions, key=lambda x: int(x.version))
-            run = client.get_run(latest.run_id)
+        # Try to connect to MLflow (DagsHub or local)
+        with st.spinner("Connecting to MLflow..."):
+            client = mlflow.MlflowClient()
             
-            return {
-                "version": latest.version,
-                "run_id": latest.run_id,
-                "mae": run.data.metrics.get("mae", 0),
-                "rmse": run.data.metrics.get("rmse", 0),
-                "r2": run.data.metrics.get("r2", 0),
-                "stage": latest.current_stage,
-                "timestamp": latest.creation_timestamp,
-            }
-        return None
+            # Get latest version
+            versions = client.search_model_versions("name='energy-demand-lgbm'", max_results=5)
+            if versions:
+                latest = max(versions, key=lambda x: int(x.version))
+                run = client.get_run(latest.run_id)
+                
+                return {
+                    "version": latest.version,
+                    "run_id": latest.run_id,
+                    "mae": run.data.metrics.get("mae", 0),
+                    "rmse": run.data.metrics.get("rmse", 0),
+                    "r2": run.data.metrics.get("r2", 0),
+                    "stage": latest.current_stage,
+                    "timestamp": latest.creation_timestamp,
+                }
+            return None
     except Exception as e:
-        # Don't block the dashboard if MLflow fails
+        # Show the actual error for debugging
+        st.error(f"❌ MLflow error: {type(e).__name__}: {str(e)}")
         return None
 
 
