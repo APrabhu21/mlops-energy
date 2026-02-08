@@ -3,14 +3,14 @@ Run drift detection for GitHub Actions or manual execution.
 Outputs should_retrain status for workflow decision.
 """
 import sys
+import os
 from pathlib import Path
 
 # Add project root to Python path
-project_root = Path(__file__).parent.parent.parent
+project_root = Path(__file__).parent.parent.parent.resolve()
 sys.path.insert(0, str(project_root))
 
 import pandas as pd
-import os
 
 from src.monitoring.drift_detection import run_drift_check, save_drift_results
 from src.config import PROCESSED_DIR

@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 # Add project root to Python path
-project_root = Path(__file__).parent.parent.parent
+project_root = Path(__file__).parent.parent.parent.resolve()
 sys.path.insert(0, str(project_root))
 
 import pandas as pd
@@ -22,13 +22,13 @@ def main():
     features = pd.read_parquet(features_path)
     print(f"✓ Loaded {len(features)} rows, {len(features.columns)} columns")
     
+    # Calculate appropriate test size (use last 20% or min 24 hours)
+    test_size = max(24, int(len(features) * 0.2))
+    print(f"Using test_size: {test_size} rows ({test_size/len(features):.1%})")
+    
     # Train model
     print("Training model...")
-    run_id, metrics = train_model(
-        features,
-        target_col='demand_mwh',
-        experiment_name='energy-demand-auto-retrain'
-    )
+    model, metrics, run_id = train_model(features, test_size=test_size)
     
     print(f"✓ Model trained: {run_id}")
     print(f"  Metrics: {metrics}")
