@@ -25,7 +25,8 @@ jobs:
     - name: Install dependencies
       run: pip install -q -r requirements.txt
       
-    - name: Download latest features
+    - name: Download latest features (or use committed data)
+      continue-on-error: true
       uses: actions/download-artifact@v4
       with:
         name: features
@@ -76,7 +77,8 @@ jobs:
     - name: Install dependencies
       run: pip install -q -r requirements.txt
       
-    - name: Download features
+    - name: Download features (or use committed data)
+      continue-on-error: true
       uses: actions/download-artifact@v4
       with:
         name: features
@@ -87,6 +89,8 @@ jobs:
         MLFLOW_TRACKING_URI: https://dagshub.com/atharvaprabhu6/mlops-energy.mlflow
         DAGSHUB_USER: atharvaprabhu6
         DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
+        MLFLOW_TRACKING_USERNAME: atharvaprabhu6
+        MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
       run: |
         python -c "
         from src.model.train import train_model
