@@ -1,4 +1,4 @@
-name: Data Ingestion & Drift Detection
+name: Data Ingestion
 
 on:
   schedule:
