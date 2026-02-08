@@ -26,7 +26,7 @@ if hasattr(st, 'secrets') and 'mlflow' in st.secrets:
     os.environ['MLFLOW_TRACKING_URI'] = mlflow_config.get('MLFLOW_TRACKING_URI', '')
     os.environ['MLFLOW_TRACKING_USERNAME'] = mlflow_config.get('DAGSHUB_USER', '')
     os.environ['MLFLOW_TRACKING_PASSWORD'] = mlflow_config.get('DAGSHUB_TOKEN', '')
-    os.environ['MLFLOW_HTTP_REQUEST_TIMEOUT'] = '10'  # 10 second timeout
+    os.environ['MLFLOW_HTTP_REQUEST_TIMEOUT'] = '30'  # 30 second timeout for slower connections
     mlflow.set_tracking_uri(mlflow_config['MLFLOW_TRACKING_URI'])
 
 # Page config
