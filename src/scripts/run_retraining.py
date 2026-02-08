@@ -1,8 +1,14 @@
 """
 Run model retraining for GitHub Actions or manual execution.
 """
-import pandas as pd
+import sys
 from pathlib import Path
+
+# Add project root to Python path
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+import pandas as pd
 
 from src.model.train import train_model
 from src.model.registry import promote_to_champion

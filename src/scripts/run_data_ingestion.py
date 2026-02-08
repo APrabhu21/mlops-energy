@@ -1,9 +1,15 @@
 """
 Run data ingestion pipeline for GitHub Actions or manual execution.
 """
+import sys
+from pathlib import Path
+
+# Add project root to Python path
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
 from datetime import datetime, timedelta
 import pandas as pd
-from pathlib import Path
 
 from src.data.eia_api import fetch_demand_data
 from src.data.weather_api import fetch_weather_data
