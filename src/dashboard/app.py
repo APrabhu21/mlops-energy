@@ -10,6 +10,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 import json
 import sys
+import os
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
@@ -18,6 +19,14 @@ sys.path.insert(0, str(project_root))
 from src.config import PROCESSED_DIR, REFERENCE_DIR, RAW_DIR
 from src.model.registry import get_champion_model
 import mlflow
+
+# Configure MLflow for DagsHub if secrets are available
+if hasattr(st, 'secrets') and 'mlflow' in st.secrets:
+    mlflow_config = st.secrets['mlflow']
+    os.environ['MLFLOW_TRACKING_URI'] = mlflow_config.get('MLFLOW_TRACKING_URI', '')
+    os.environ['MLFLOW_TRACKING_USERNAME'] = mlflow_config.get('DAGSHUB_USER', '')
+    os.environ['MLFLOW_TRACKING_PASSWORD'] = mlflow_config.get('DAGSHUB_TOKEN', '')
+    mlflow.set_tracking_uri(mlflow_config['MLFLOW_TRACKING_URI'])
 
 # Page config
 st.set_page_config(
@@ -94,11 +103,7 @@ def load_drift_results():
 def get_model_info():
     """Get champion model information."""
     try:
-        # Check if MLflow database exists
-        mlflow_db = Path("mlflow.db")
-        if not mlflow_db.exists():
-            return None
-            
+        # Try to connect to MLflow (DagsHub or local)
         client = mlflow.MlflowClient()
         
         # Get latest version
@@ -118,6 +123,7 @@ def get_model_info():
             }
         return None
     except Exception as e:
+        st.warning(f"Could not load model info: {str(e)}")
         return None
 
 
