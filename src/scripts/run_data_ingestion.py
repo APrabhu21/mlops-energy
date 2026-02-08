@@ -51,6 +51,28 @@ def main():
     features_df = build_features(demand_df, weather_df)
     print(f"✓ Built {len(features_df)} feature rows")
     
+    # Clean data
+    print("Cleaning data...")
+    initial_rows = len(features_df)
+    
+    # Remove rows with invalid demand values
+    features_df = features_df[
+        (features_df['demand_mwh'] > 0) & 
+        (features_df['demand_mwh'] < 100000)
+    ]
+    
+    # Remove duplicate timestamps (keep first occurrence)
+    features_df = features_df.drop_duplicates(subset=['timestamp'], keep='first')
+    
+    # Sort by timestamp
+    features_df = features_df.sort_values('timestamp').reset_index(drop=True)
+    
+    removed_rows = initial_rows - len(features_df)
+    if removed_rows > 0:
+        print(f"  Removed {removed_rows} invalid/duplicate rows")
+    
+    print(f"✓ Cleaned to {len(features_df)} valid rows")
+    
     # Save features
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
     output_path = PROCESSED_DIR / 'features.parquet'
