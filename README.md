@@ -2,13 +2,13 @@
 
 <div align="center">
 
-[![Live Dashboard](https://img.shields.io/badge/Live%20Dashboard-Streamlit-FF4B4B?style=for-the-badge&logo=streamlit)](https://your-app.streamlit.app)
+[![Live Dashboard](https://img.shields.io/badge/Live%20Dashboard-Streamlit-FF4B4B?style=for-the-badge&logo=streamlit)](https://mlops-energy.streamlit.app)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 **A production-ready MLOps system that forecasts US electricity demand with continuous learning, automated drift detection, and self-healing capabilities.**
 
-[Live Demo](https://your-app.streamlit.app) • [Documentation](DEPLOYMENT.md) • [Architecture](#-architecture)
+[Live Demo](https://mlops-energy.streamlit.app) • [Documentation](DEPLOYMENT.md) • [Architecture](#-architecture)
 
 </div>
 
@@ -78,7 +78,7 @@ Traditional ML projects stop at model training. This system handles the full pro
 
 ## 🚀 Live Demo
 
-**Dashboard**: [https://your-app.streamlit.app](https://your-app.streamlit.app)
+**Dashboard**: [https://mlops-energy.streamlit.app](https://mlops-energy.streamlit.app)
 
 **What You'll See:**
 - 📊 Real-time energy demand predictions vs actuals
@@ -93,7 +93,7 @@ Traditional ML projects stop at model training. This system handles the full pro
 ## 💻 Quick Start
 
 ### Option 1: Use the Live System (No Setup!)
-Just visit the [dashboard](https://your-app.streamlit.app) — it's already running!
+Just visit the [dashboard](https://mlops-energy.streamlit.app) — it's already running!
 
 ### Option 2: Run Locally
 
@@ -369,7 +369,7 @@ MIT License - feel free to use this for learning or production!
 
 **Project by**: APrabhu21  
 **GitHub**: [https://github.com/APrabhu21](https://github.com/APrabhu21)  
-**Live Demo**: [https://your-app.streamlit.app](https://your-app.streamlit.app)
+**Live Demo**: [https://mlops-energy.streamlit.app](https://mlops-energy.streamlit.app)
 
 ---
 
@@ -377,6 +377,6 @@ MIT License - feel free to use this for learning or production!
 
 **⭐ Star this repo if you found it helpful!**
 
-[View Live Demo](https://your-app.streamlit.app) • [Deploy Your Own](DEPLOYMENT.md) • [Report Issue](https://github.com/APrabhu21/mlops-energy/issues)
+[View Live Demo](https://mlops-energy.streamlit.app) • [Deploy Your Own](DEPLOYMENT.md) • [Report Issue](https://github.com/APrabhu21/mlops-energy/issues)
 
 </div>

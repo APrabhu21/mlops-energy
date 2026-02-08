@@ -32,8 +32,20 @@ WEATHER_TIMEZONE = os.getenv("WEATHER_TZ", "America/New_York")
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://mlops:mlops@localhost:5432/energy_mlops")
 
 # MLflow
-MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
+MLFLOW_TRACKING_URI = os.getenv(
+    "MLFLOW_TRACKING_URI", 
+    "https://dagshub.com/atharvaprabhu6/mlops-energy.mlflow"
+)
 MLFLOW_EXPERIMENT_NAME = "energy-demand-forecast"
+
+# DagsHub credentials (for MLflow authentication)
+DAGSHUB_USER = os.getenv("DAGSHUB_USER", "atharvaprabhu6")
+DAGSHUB_TOKEN = os.getenv("DAGSHUB_TOKEN", "")
+
+# Set MLflow credentials as environment variables if token is provided
+if DAGSHUB_TOKEN:
+    os.environ["MLFLOW_TRACKING_USERNAME"] = DAGSHUB_USER
+    os.environ["MLFLOW_TRACKING_PASSWORD"] = DAGSHUB_TOKEN
 
 # Model
 MODEL_NAME = "energy-demand-lgbm"  # name in MLflow registry

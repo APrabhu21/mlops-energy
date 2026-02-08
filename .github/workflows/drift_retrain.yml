@@ -83,6 +83,10 @@ jobs:
         path: data/processed/
         
     - name: Retrain model
+      env:
+        MLFLOW_TRACKING_URI: https://dagshub.com/atharvaprabhu6/mlops-energy.mlflow
+        DAGSHUB_USER: atharvaprabhu6
+        DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
       run: |
         python -c "
         from src.model.train import train_model
