@@ -94,7 +94,11 @@ def load_drift_results():
 def get_model_info():
     """Get champion model information."""
     try:
-        model = get_champion_model()
+        # Check if MLflow database exists
+        mlflow_db = Path("mlflow.db")
+        if not mlflow_db.exists():
+            return None
+            
         client = mlflow.MlflowClient()
         
         # Get latest version
@@ -114,7 +118,6 @@ def get_model_info():
             }
         return None
     except Exception as e:
-        st.error(f"Error loading model info: {e}")
         return None
 
 
@@ -309,7 +312,7 @@ def main():
         if model_info:
             st.metric("Model MAE", f"{model_info['mae']:,.0f} MWh")
         else:
-            st.metric("Model MAE", "N/A")
+            st.metric("Model MAE", "Training needed")
     
     with col3:
         if model_info:
