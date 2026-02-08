@@ -27,9 +27,7 @@ jobs:
     - name: Run data ingestion
       env:
         EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
-        PYTHONPATH: ${{ github.workspace }}
-      run: |
-        python -c "from src.data.eia_api import fetch_demand_data; from src.data.weather_api import fetch_weather_data; from src.data.features import build_features; from datetime import datetime, timedelta; from src.config import RAW_DIR, PROCESSED_DIR; end = datetime.utcnow(); start = end - timedelta(days=7); demand_df = fetch_demand_data(start.strftime('%Y-%m-%dT%H'), end.strftime('%Y-%m-%dT%H')); weather_df = fetch_weather_data(start.strftime('%Y-%m-%d'), end.strftime('%Y-%m-%d')); features_df = build_features(demand_df, weather_df); features_df.to_parquet(PROCESSED_DIR / 'features.parquet', index=False); print(f'✓ Saved {len(features_df)} feature rows')"
+      run: python src/scripts/run_data_ingestion.py
         
     - name: Upload feature data
       uses: actions/upload-artifact@v4
