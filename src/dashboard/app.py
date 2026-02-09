@@ -365,8 +365,12 @@ def main():
         return
     
     # Filter to time range
-    cutoff = datetime.now() - timedelta(days=days_back)
+    # Use the latest timestamp in data as reference to avoid timezone issues
+    latest_time = features_df['timestamp'].max()
+    cutoff = latest_time - timedelta(days=days_back)
     df_filtered = features_df[features_df['timestamp'] >= cutoff].copy()
+    
+    st.sidebar.info(f"Showing {len(df_filtered)} of {len(features_df)} records")
     
     # Row 1: Key Metrics
     st.markdown("### 📈 Key Performance Indicators")
