@@ -25,9 +25,9 @@ from src.config import RAW_DIR, PROCESSED_DIR
 
 
 def main():
-    # Fetch last 7 days of data
+    # Fetch last 30 days of data to build up historical dataset
     end = datetime.utcnow()
-    start = end - timedelta(days=7)
+    start = end - timedelta(days=30)
     
     print(f"Fetching data from {start} to {end}...")
     
@@ -50,6 +50,23 @@ def main():
     # Build features
     features_df = build_features(demand_df, weather_df)
     print(f"✓ Built {len(features_df)} feature rows")
+    
+    # If existing features exist, merge with new data (keep last 30 days total)
+    output_path = PROCESSED_DIR / 'features.parquet'
+    if output_path.exists():
+        print("Merging with existing data...")
+        existing_df = pd.read_parquet(output_path)
+        existing_df['timestamp'] = pd.to_datetime(existing_df['timestamp'])
+        
+        # Combine and deduplicate
+        features_df = pd.concat([existing_df, features_df], ignore_index=True)
+        features_df = features_df.drop_duplicates(subset=['timestamp'], keep='last')
+        features_df = features_df.sort_values('timestamp').reset_index(drop=True)
+        
+        # Keep only last 30 days
+        cutoff = features_df['timestamp'].max() - timedelta(days=30)
+        features_df = features_df[features_df['timestamp'] >= cutoff]
+        print(f"✓ Merged to {len(features_df)} total rows (30 days)")
     
     # Clean data
     print("Cleaning data...")
