@@ -43,7 +43,7 @@ jobs:
         EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
       run: python src/scripts/run_data_ingestion.py
     
-    - name: Check data quality
+    - name: Check data quality (before predictions)
       run: python src/scripts/check_data_quality.py
     
     - name: Generate predictions

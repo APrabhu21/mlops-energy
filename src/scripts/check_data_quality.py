@@ -28,8 +28,9 @@ def check_data_quality(df: pd.DataFrame) -> tuple[bool, list[str]]:
         issues.append(f"CRITICAL: Missing columns: {missing}")
     
     # Check for excessive nulls (over 80% is critical)
+    # Skip 'prediction' column since it's added later in the pipeline
     null_pct = df.isnull().sum() / len(df)
-    high_null_cols = null_pct[null_pct > 0.8].index.tolist()
+    high_null_cols = [col for col in null_pct[null_pct > 0.8].index if col != 'prediction']
     if high_null_cols:
         issues.append(f"CRITICAL: Columns with >80% nulls: {high_null_cols}")
     
