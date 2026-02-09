@@ -32,7 +32,7 @@ if hasattr(st, 'secrets') and 'mlflow' in st.secrets:
 # Page config
 st.set_page_config(
     page_title="Energy Demand Forecasting - MLOps Dashboard",
-    page_icon="⚡",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -203,7 +203,7 @@ def get_model_info():
         
         # If no tracking URI, show helpful message
         if not tracking_uri or 'file:' in tracking_uri:
-            st.info("ℹ️ Add MLflow secrets to see model info")
+            st.info("Add MLflow secrets to see model info")
             return None
         
         # Try to connect to MLflow (DagsHub or local)
@@ -228,7 +228,7 @@ def get_model_info():
             return None
     except Exception as e:
         # Show the actual error for debugging
-        st.error(f"❌ MLflow error: {type(e).__name__}: {str(e)}")
+        st.error(f"MLflow error: {type(e).__name__}: {str(e)}")
         return None
 
 
@@ -653,22 +653,22 @@ def main():
     """Main dashboard application."""
     
     # Enhanced Header with subtitle
-    st.markdown('<p class="main-header">⚡ Energy Demand Forecasting</p>', unsafe_allow_html=True)
+    st.markdown('<p class="main-header">Energy Demand Forecasting</p>', unsafe_allow_html=True)
     st.markdown('<p class="subtitle">Production MLOps Dashboard · Real-time Monitoring & Drift Detection</p>', unsafe_allow_html=True)
     
     # Sidebar
-    st.sidebar.title("⚙️ Dashboard Controls")
+    st.sidebar.title("Dashboard Controls")
     
     # Time range selector
     days_back = st.sidebar.slider("📅 Days to Display", 1, 30, 7, help="Select the time range for data visualization")
     
     # Refresh button
-    if st.sidebar.button("🔄 Refresh Data", help="Clear cache and reload all data"):
+    if st.sidebar.button("Refresh Data", help="Clear cache and reload all data"):
         st.cache_data.clear()
         st.rerun()
     
     st.sidebar.markdown("---")
-    st.sidebar.markdown("### 📊 System Health")
+    st.sidebar.markdown("### System Health")
     
     # Load data
     features_df = load_feature_data()
@@ -679,23 +679,23 @@ def main():
     
     # System status indicators with better styling
     if features_df is not None:
-        st.sidebar.success(f"✓ **Data Pipeline:** {len(features_df)} records")
+        st.sidebar.success(f"Data Pipeline: {len(features_df)} records")
     else:
         st.sidebar.error("✗ **Data Pipeline:** No data")
     
     if model_info:
-        st.sidebar.success(f"✓ Model v{model_info['version']} Active")
+        st.sidebar.success(f"Model v{model_info['version']} Active")
     else:
         st.sidebar.warning("⚠ No model loaded")
     
     if drift_results and drift_results.get('dataset_drift'):
         st.sidebar.error("⚠ Drift Detected!")
     else:
-        st.sidebar.success("✓ No Drift")
+        st.sidebar.success("No Drift")
     
     # Main content
     if features_df is None:
-        st.warning("⚠️ No data available. Run the data ingestion flow first.")
+        st.warning("No data available. Run the data ingestion flow first.")
         st.code("python src/scripts/run_flows.py")
         return
     
@@ -708,7 +708,7 @@ def main():
     st.sidebar.info(f"Showing {len(df_filtered)} of {len(features_df)} records")
     
     # Row 1: Key Metrics
-    st.markdown("### 📈 Key Performance Indicators")
+    st.markdown("### Key Performance Indicators")
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
@@ -744,12 +744,12 @@ def main():
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        st.markdown("### 📊 Demand Forecast")
+        st.markdown("### Demand Forecast")
         predictions_chart = create_predictions_chart(df_filtered)
         st.plotly_chart(predictions_chart, use_container_width=True)
     
     with col2:
-        st.markdown("### 🎯 Drift Status")
+        st.markdown("### Drift Status")
         if drift_results:
             drift_chart = create_drift_chart(drift_results)
             if drift_chart:
@@ -757,11 +757,11 @@ def main():
             
             # Drift details
             if drift_results.get('dataset_drift'):
-                st.error(f"⚠️ **Drift Detected!**")
+                st.error(f"**Drift Detected!**")
                 st.write(f"Drifted Features: {drift_results['n_drifted_features']}/{drift_results['n_total_features']}")
                 st.write(f"Threshold: {drift_results['threshold']:.0%}")
             else:
-                st.success("✓ No significant drift")
+                st.success("No significant drift")
         else:
             st.info("No drift data available")
     
@@ -773,7 +773,7 @@ def main():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("### 🔍 Feature Drift Breakdown")
+            st.markdown("### Feature Drift Breakdown")
             drift_breakdown = create_drift_breakdown(drift_results)
             if drift_breakdown:
                 st.plotly_chart(drift_breakdown, use_container_width=True)
@@ -781,7 +781,7 @@ def main():
                 st.info("Drift breakdown not available")
         
         with col2:
-            st.markdown("### 📊 Feature Importance")
+            st.markdown("### Feature Importance")
             if model_info:
                 importance_chart = create_feature_importance_chart(model_info)
                 if importance_chart:
@@ -793,7 +793,7 @@ def main():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("### 📊 Feature Importance")
+            st.markdown("### Feature Importance")
             if model_info:
                 importance_chart = create_feature_importance_chart(model_info)
                 if importance_chart:
@@ -802,7 +802,7 @@ def main():
                 st.info("Model information not available")
         
         with col2:
-            st.markdown("### 📉 Error Distribution")
+            st.markdown("### Error Distribution")
             error_chart = create_error_distribution(df_filtered)
             if error_chart:
                 st.plotly_chart(error_chart, use_container_width=True)
@@ -812,7 +812,7 @@ def main():
     # Row 4: Performance Trends
     if perf_log is not None and len(perf_log) > 1:
         st.markdown("---")
-        st.markdown("### 📈 Model Performance Trends")
+        st.markdown("### Model Performance Trends")
         
         col1, col2, col3, col4 = st.columns(4)
         latest = perf_log.iloc[-1]
@@ -832,9 +832,9 @@ def main():
     
     # Row 5: Data Tables & Model Comparison
     st.markdown("---")
-    st.markdown("### 📋 Detailed Information")
+    st.markdown("### Detailed Information")
     
-    tab1, tab2, tab3, tab4 = st.tabs(["📊 Recent Predictions", "🤖 Model Versions", "📈 Model Details", "🔧 System Logs"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Recent Predictions", "Model Versions", "Model Details", "System Logs"])
     
     with tab1:
         display_cols = ['timestamp', 'demand_mwh', 'temperature', 'hour_of_day', 'day_of_week']
@@ -853,7 +853,7 @@ def main():
         if 'prediction' in df_filtered.columns:
             csv = df_filtered[display_cols].to_csv(index=False)
             st.download_button(
-                label="📥 Download Predictions as CSV",
+                label="Download Predictions as CSV",
                 data=csv,
                 file_name=f"predictions_{datetime.now().strftime('%Y%m%d')}.csv",
                 mime="text/csv"
@@ -872,7 +872,7 @@ def main():
             # Highlight best model
             best_idx = model_versions['MAE'].str.replace(',', '').astype(float).idxmin()
             best_version = model_versions.loc[best_idx, 'Version']
-            st.info(f"🏆 Best performing model: **Version {best_version}** (lowest MAE)")
+            st.info(f"Best performing model: **Version {best_version}** (lowest MAE)")
         else:
             st.info("Model version history not available")
     
@@ -896,22 +896,22 @@ def main():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("**📊 Data Pipeline Status**")
-            st.text(f"✓ Last data update: {df_filtered['timestamp'].max()}")
-            st.text(f"✓ Total records: {len(features_df)}")
-            st.text(f"✓ Filtered records: {len(df_filtered)}")
-            st.text(f"✓ Reference samples: {len(reference_df) if reference_df is not None else 0}")
-            st.text(f"✓ Date range: {df_filtered['timestamp'].min().date()} to {df_filtered['timestamp'].max().date()}")
+            st.markdown("**Data Pipeline Status**")
+            st.text(f"Last data update: {df_filtered['timestamp'].max()}")
+            st.text(f"Total records: {len(features_df)}")
+            st.text(f"Filtered records: {len(df_filtered)}")
+            st.text(f"Reference samples: {len(reference_df) if reference_df is not None else 0}")
+            st.text(f"Date range: {df_filtered['timestamp'].min().date()} to {df_filtered['timestamp'].max().date()}")
         
         with col2:
-            st.markdown("**🔄 Monitoring Status**")
+            st.markdown("**Monitoring Status**")
             if drift_results:
                 check_time = drift_results.get('check_timestamp', 'N/A')
-                st.text(f"✓ Last drift check: {check_time[:19] if len(check_time) > 19 else check_time}")
-                st.text(f"✓ Drift threshold: {drift_results.get('threshold', 0.3):.0%}")
-                st.text(f"✓ Features monitored: {drift_results.get('n_total_features', 0)}")
+                st.text(f"Last drift check: {check_time[:19] if len(check_time) > 19 else check_time}")
+                st.text(f"Drift threshold: {drift_results.get('threshold', 0.3):.0%}")
+                st.text(f"Features monitored: {drift_results.get('n_total_features', 0)}")
             if perf_log is not None:
-                st.text(f"✓ Performance logs: {len(perf_log)} entries")
+                st.text(f"Performance logs: {len(perf_log)} entries")
     
     # Footer with enhanced branding
     st.markdown("---")

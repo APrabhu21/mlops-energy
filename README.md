@@ -1,4 +1,4 @@
-# ⚡ Energy Demand Forecasting — End-to-End MLOps System
+# Energy Demand Forecasting — End-to-End MLOps System
 
 <div align="center">
 
@@ -14,33 +14,33 @@
 
 ---
 
-## 🎯 Project Overview
+## Project Overview
 
 This is a complete end-to-end MLOps pipeline that demonstrates industry best practices for production machine learning systems:
 
 ### What It Does
-- 📊 **Forecasts** electricity demand 24 hours ahead for the NY ISO grid region
-- 🔄 **Automatically ingests** hourly demand data (EIA API) and weather features (Open-Meteo)
-- 🤖 **Continuously learns** by detecting data drift and retraining models automatically
-- 📈 **Tracks** all experiments and models with MLflow
-- 🚀 **Serves** predictions via FastAPI with Prometheus metrics
-- 📉 **Monitors** model performance and data quality with Evidently AI
-- ⏰ **Orchestrates** all workflows with Prefect (scheduled and event-driven)
-- 📱 **Visualizes** everything in an interactive Streamlit dashboard
+- **Forecasts** electricity demand 24 hours ahead for the NY ISO grid region
+- **Automatically ingests** hourly demand data (EIA API) and weather features (Open-Meteo)
+- **Continuously learns** by detecting data drift and retraining models automatically
+- **Tracks** all experiments and models with MLflow
+- **Serves** predictions via FastAPI with Prometheus metrics
+- **Monitors** model performance and data quality with Evidently AI
+- **Orchestrates** all workflows with Prefect (scheduled and event-driven)
+- **Visualizes** everything in an interactive Streamlit dashboard
 
 ### Why This Matters
 Traditional ML projects stop at model training. This system handles the full production lifecycle:
-- ✅ Real-world data ingestion from public APIs
-- ✅ Feature engineering with lag variables and temporal features
-- ✅ Automated drift detection (>30% = retrain trigger)
-- ✅ Champion/Challenger model promotion
-- ✅ RESTful API serving with monitoring
-- ✅ Scheduled workflows running 24/7 in the cloud
-- ✅ **100% free hosting** on GitHub Actions + Streamlit Cloud
+- Real-world data ingestion from public APIs
+- Feature engineering with lag variables and temporal features
+- Automated drift detection (>30% = retrain trigger)
+- Champion/Challenger model promotion
+- RESTful API serving with monitoring
+- Scheduled workflows running 24/7 in the cloud
+- **100% free hosting** on GitHub Actions + Streamlit Cloud
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -76,21 +76,21 @@ Traditional ML projects stop at model training. This system handles the full pro
 
 ---
 
-## 🚀 Live Demo
+## Live Demo
 
 **Dashboard**: [https://mlops-energy.streamlit.app](https://mlops-energy.streamlit.app)
 
 **What You'll See:**
-- 📊 Real-time energy demand predictions vs actuals
-- 🎯 Drift detection gauge (currently 50% drift detected!)
-- 📉 Error distribution histograms
-- 🔍 Top feature importance
-- 📋 Recent predictions table
-- 📈 Model performance metrics over time
+- Real-time energy demand predictions vs actuals
+- Drift detection gauge (currently 50% drift detected!)
+- Error distribution histograms
+- Top feature importance
+- Recent predictions table
+- Model performance metrics over time
 
 ---
 
-## 💻 Quick Start
+## Quick Start
 
 ### Option 1: Use the Live System (No Setup!)
 Just visit the [dashboard](https://mlops-energy.streamlit.app) — it's already running!
@@ -133,7 +133,7 @@ python start_api.bat  # Windows
 
 ---
 
-## 📊 Tech Stack
+## Tech Stack
 
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
@@ -150,7 +150,7 @@ python start_api.bat  # Windows
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 mlops-energy/
@@ -176,9 +176,9 @@ mlops-energy/
 
 ---
 
-## 🔄 How It Works
+## How It Works
 
-### 1️⃣ Data Ingestion (Every 6 Hours)
+### 1. Data Ingestion (Every 6 Hours)
 ```python
 # Automated via GitHub Actions or Prefect
 fetch_demand_data()     # EIA API → hourly demand (NY ISO)
@@ -193,7 +193,7 @@ build_features()        # Engineer 20+ features (lags, temporal, weather)
 - **Weather**: temperature, humidity, wind_speed, precipitation
 - **Degree Days**: heating_degree_hours, cooling_degree_hours
 
-### 2️⃣ Drift Detection (Daily at 2 AM UTC)
+### 2. Drift Detection (Daily at 2 AM UTC)
 ```python
 # Compares recent 508 samples vs reference 4,732 samples
 drift_share = run_drift_check(reference_df, current_df)
@@ -203,14 +203,14 @@ if drift_share > 0.30:  # 30% threshold
 
 **Current Status**: 50% drift detected (10/20 features drifted)
 
-### 3️⃣ Model Training (On Drift or Manual)
+### 3. Model Training (On Drift or Manual)
 ```python
 model, metrics = train_model(features_df)
 # Champion model: v1, MAE: 4,810 MWh, R²: 0.XX
 promote_to_champion(run_id) if new_mae < champion_mae
 ```
 
-### 4️⃣ Serving Predictions
+### 4. Serving Predictions
 ```bash
 curl -X POST http://localhost:8000/predict \
   -H "Content-Type: application/json" \
@@ -225,7 +225,7 @@ curl -X POST http://localhost:8000/predict \
 
 ---
 
-## 📈 Results & Performance
+## Results & Performance
 
 **Model Metrics** (Champion v1):
 - **MAE**: 4,810 MWh
@@ -241,7 +241,7 @@ curl -X POST http://localhost:8000/predict \
 
 ---
 
-## 🚢 Cloud Deployment
+## Cloud Deployment
 
 This system runs **100% free** in the cloud! See [DEPLOYMENT.md](DEPLOYMENT.md) for full guide.
 
@@ -264,7 +264,7 @@ This system runs **100% free** in the cloud! See [DEPLOYMENT.md](DEPLOYMENT.md) 
 
 ---
 
-## 🧪 Development
+## Development
 
 ### Run Orchestration Flows
 
@@ -295,23 +295,23 @@ pytest tests/ -v  # (tests not included in this release)
 
 ---
 
-## 🎓 Learning Outcomes
+## Learning Outcomes
 
 This project demonstrates:
-- ✅ **Production MLOps** patterns (not just notebooks)
-- ✅ **Real-world data** from public APIs (EIA, Open-Meteo)
-- ✅ **Automated pipelines** with scheduling and triggers
-- ✅ **Model monitoring** with drift detection
-- ✅ **Continuous learning** via champion/challenger
-- ✅ **API design** for ML serving
-- ✅ **Cloud deployment** on free tier
-- ✅ **End-to-end ownership** (data → model → API → dashboard)
+- **Production MLOps** patterns (not just notebooks)
+- **Real-world data** from public APIs (EIA, Open-Meteo)
+- **Automated pipelines** with scheduling and triggers
+- **Model monitoring** with drift detection
+- **Continuous learning** via champion/challenger
+- **API design** for ML serving
+- **Cloud deployment** on free tier
+- **End-to-end ownership** (data → model → API → dashboard)
 
 **Perfect for portfolio or interviews!**
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 
 ### Dashboard - Main View
 ![Dashboard Main](https://via.placeholder.com/800x400?text=Add+Screenshot)
@@ -327,7 +327,7 @@ This project demonstrates:
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
 Future enhancements:
 - [ ] Multi-region support (CAISO, ERCOT, PJM)
@@ -341,7 +341,7 @@ Future enhancements:
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions welcome! Please:
 1. Fork the repo
@@ -350,13 +350,13 @@ Contributions welcome! Please:
 
 ---
 
-## 📝 License
+## License
 
 MIT License - feel free to use this for learning or production!
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **EIA (Energy Information Administration)** for electricity demand data
 - **Open-Meteo** for weather API access
@@ -365,7 +365,7 @@ MIT License - feel free to use this for learning or production!
 
 ---
 
-## 📞 Contact
+## Contact
 
 **Project by**: APrabhu21  
 **GitHub**: [https://github.com/APrabhu21](https://github.com/APrabhu21)  
@@ -375,7 +375,7 @@ MIT License - feel free to use this for learning or production!
 
 <div align="center">
 
-**⭐ Star this repo if you found it helpful!**
+**Star this repo if you found it helpful!**
 
 [View Live Demo](https://mlops-energy.streamlit.app) • [Deploy Your Own](DEPLOYMENT.md) • [Report Issue](https://github.com/APrabhu21/mlops-energy/issues)
 
