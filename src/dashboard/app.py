@@ -317,29 +317,33 @@ def create_predictions_chart(df):
 
 
 def create_feature_importance_chart(model_info):
-    """Create feature importance bar chart from real model data."""
+    """Create feature importance bar chart from MLflow artifact."""
     try:
         client = mlflow.MlflowClient()
-        run = client.get_run(model_info['run_id'])
+        run_id = model_info['run_id']
         
-        # Try to get feature importance from model
-        model_uri = f"runs:/{model_info['run_id']}/model"
+        # Try to get feature importance from logged CSV artifact
         try:
-            import mlflow.lightgbm
-            model = mlflow.lightgbm.load_model(model_uri)
-            importance = model.feature_importances_
-            features = model.feature_name_
+            import tempfile
+            import os
             
-            # Sort by importance
-            sorted_idx = importance.argsort()[::-1][:10]  # Top 10
-            features = [features[i] for i in sorted_idx]
-            importance = [importance[i] for i in sorted_idx]
-            
-            # Normalize to sum to 1
-            total = sum(importance)
-            importance = [i/total for i in importance]
-        except:
-            # Fallback: Try to get from logged metrics
+            # Download the feature importance artifact
+            artifact_path = "feature_importance.csv"
+            with tempfile.TemporaryDirectory() as tmpdir:
+                local_path = client.download_artifacts(run_id, artifact_path, tmpdir)
+                importance_df = pd.read_csv(local_path)
+                
+                # Get top 10 features
+                importance_df = importance_df.head(10)
+                features = importance_df['feature'].tolist()
+                importance = importance_df['importance'].tolist()
+                
+                # Normalize to sum to 1
+                total = sum(importance)
+                importance = [i/total for i in importance]
+        except Exception as e:
+            print(f"Could not load feature importance artifact: {e}")
+            # Fallback to placeholder data
             features = ['temperature', 'hour_of_day', 'demand_lag_1h', 'day_of_week', 
                        'demand_lag_24h', 'humidity', 'wind_speed', 'is_weekend']
             importance = [0.25, 0.18, 0.15, 0.12, 0.10, 0.08, 0.07, 0.05]
