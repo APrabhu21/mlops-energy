@@ -48,9 +48,50 @@ def run_drift_check(
     ref = reference_df[common_cols].copy()
     cur = current_df[common_cols].copy()
     
+    # Remove constant features (zero or near-zero variance) to avoid false drift
+    variance_threshold = 0.01
+    ref_std = ref.std()
+    cur_std = cur.std()
+    non_constant = (ref_std > variance_threshold) & (cur_std > variance_threshold)
+    non_constant_cols = ref_std[non_constant].index.tolist()
+    
+    if len(non_constant_cols) < len(common_cols):
+        excluded = set(common_cols) - set(non_constant_cols)
+        print(f"Excluding {len(excluded)} constant features: {excluded}")
+        common_cols = non_constant_cols
+        ref = ref[common_cols]
+        cur = cur[common_cols]
+    
+    if not common_cols:
+        print("WARNING: All features are constant, skipping drift detection")
+        return False, 0.0, {
+            "dataset_drift": False,
+            "drift_share": 0.0,
+            "n_drifted_features": 0,
+            "n_total_features": 0,
+            "threshold": DRIFT_SHARE_THRESHOLD,
+            "check_timestamp": datetime.now().isoformat(),
+        }
+    
     print(f"Running drift detection on {len(common_cols)} features...")
     print(f"Reference data: {len(ref)} rows")
     print(f"Current data: {len(cur)} rows")
+    
+    # Check if datasets are identical (same timestamps)
+    if 'timestamp' in reference_df.columns and 'timestamp' in current_df.columns:
+        ref_times = set(reference_df['timestamp'].astype(str))
+        cur_times = set(current_df['timestamp'].astype(str))
+        if ref_times == cur_times and len(ref) == len(cur):
+            print("Reference and current data are identical (same timestamps) - no drift")
+            return False, 0.0, {
+                "dataset_drift": False,
+                "drift_share": 0.0,
+                "n_drifted_features": 0,
+                "n_total_features": len(common_cols),
+                "threshold": DRIFT_SHARE_THRESHOLD,
+                "check_timestamp": datetime.now().isoformat(),
+                "note": "Identical datasets - no drift detection performed"
+            }
     
     # Create and run drift report using preset (v0.7.20 API)
     report = Report(metrics=[DataDriftPreset()])
