@@ -25,14 +25,44 @@ from src.config import RAW_DIR, PROCESSED_DIR
 
 
 def main():
-    # Fetch last 30 days of data to build up historical dataset
-    end = datetime.utcnow()
-    start = end - timedelta(days=30)
+    eia_client = EIAClient()
+    weather_client = WeatherClient()
+    output_path = PROCESSED_DIR / 'features.parquet'
     
-    print(f"Fetching data from {start} to {end}...")
+    # Check if we need to backfill historical data
+    needs_backfill = False
+    if output_path.exists():
+        existing_df = pd.read_parquet(output_path)
+        existing_df['timestamp'] = pd.to_datetime(existing_df['timestamp'])
+        
+        # Check data span
+        min_ts = existing_df['timestamp'].min()
+        max_ts = existing_df['timestamp'].max()
+        data_span_days = (max_ts - min_ts).days
+        
+        print(f"Existing data: {len(existing_df)} rows, spanning {data_span_days} days")
+        print(f"Date range: {min_ts} to {max_ts}")
+        
+        # If we have less than 1 year of data, backfill to 2 years
+        if data_span_days < 365:
+            needs_backfill = True
+            print(f"⚠️ Less than 1 year of data - backfilling to 2 years...")
+    else:
+        needs_backfill = True
+        print("No existing data - fetching 2 years of historical data...")
+    
+    # Determine fetch period
+    end = datetime.utcnow()
+    if needs_backfill:
+        # Fetch full 2 years
+        start = end - timedelta(days=730)
+        print(f"Backfilling: Fetching 2 years from {start} to {end}...")
+    else:
+        # Normal operation: fetch last 30 days for updates
+        start = end - timedelta(days=30)
+        print(f"Regular update: Fetching last 30 days from {start} to {end}...")
     
     # Fetch demand data
-    eia_client = EIAClient()
     demand_df = eia_client.fetch_demand(
         start.strftime('%Y-%m-%dT%H'),
         end.strftime('%Y-%m-%dT%H')
@@ -40,7 +70,6 @@ def main():
     print(f"✓ Fetched {len(demand_df)} demand records")
     
     # Fetch weather data
-    weather_client = WeatherClient()
     weather_df = weather_client.fetch_historical(
         start.strftime('%Y-%m-%d'),
         end.strftime('%Y-%m-%d')
@@ -52,7 +81,6 @@ def main():
     print(f"✓ Built {len(features_df)} feature rows")
     
     # If existing features exist, merge with new data (keep last 730 days total)
-    output_path = PROCESSED_DIR / 'features.parquet'
     if output_path.exists():
         print("Merging with existing data...")
         existing_df = pd.read_parquet(output_path)
