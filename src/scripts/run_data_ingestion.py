@@ -51,7 +51,7 @@ def main():
     features_df = build_features(demand_df, weather_df)
     print(f"✓ Built {len(features_df)} feature rows")
     
-    # If existing features exist, merge with new data (keep last 30 days total)
+    # If existing features exist, merge with new data (keep last 730 days total)
     output_path = PROCESSED_DIR / 'features.parquet'
     if output_path.exists():
         print("Merging with existing data...")
@@ -63,10 +63,10 @@ def main():
         features_df = features_df.drop_duplicates(subset=['timestamp'], keep='last')
         features_df = features_df.sort_values('timestamp').reset_index(drop=True)
         
-        # Keep only last 30 days
-        cutoff = features_df['timestamp'].max() - timedelta(days=30)
+        # Keep last 730 days (2 years) for seasonal patterns and year-over-year trends
+        cutoff = features_df['timestamp'].max() - timedelta(days=730)
         features_df = features_df[features_df['timestamp'] >= cutoff]
-        print(f"✓ Merged to {len(features_df)} total rows (30 days)")
+        print(f"✓ Merged to {len(features_df)} total rows (up to 2 years)")
     
     # Clean data
     print("Cleaning data...")
