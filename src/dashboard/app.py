@@ -139,7 +139,6 @@ def load_reference_data():
     return None
 
 
-@st.cache_data(ttl=300)
 def load_drift_results():
     """Load latest drift detection results."""
     drift_path = Path("reports/drift_results.json")
