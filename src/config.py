@@ -34,7 +34,7 @@ DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://mlops:mlops@localhost:543
 # MLflow
 MLFLOW_TRACKING_URI = os.getenv(
     "MLFLOW_TRACKING_URI", 
-    "https://dagshub.com/atharvaprabhu6/mlops-energy.mlflow"
+    "https://dagshub.com/atharvaprabhu6/mlops-energy-dagshub.mlflow/"
 )
 MLFLOW_EXPERIMENT_NAME = "energy-demand-forecast"
 

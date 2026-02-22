@@ -50,7 +50,7 @@ jobs:
     
     - name: Generate predictions for drift check
       env:
-        MLFLOW_TRACKING_URI: https://dagshub.com/atharvaprabhu6/mlops-energy.mlflow
+        MLFLOW_TRACKING_URI: https://dagshub.com/atharvaprabhu6/mlops-energy-dagshub.mlflow/
         MLFLOW_TRACKING_USERNAME: atharvaprabhu6
         MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
       run: python src/scripts/run_predictions.py
@@ -98,7 +98,7 @@ jobs:
         
     - name: Retrain model
       env:
-        MLFLOW_TRACKING_URI: https://dagshub.com/atharvaprabhu6/mlops-energy.mlflow
+        MLFLOW_TRACKING_URI: https://dagshub.com/atharvaprabhu6/mlops-energy-dagshub.mlflow/
         DAGSHUB_USER: atharvaprabhu6
         DAGSHUB_TOKEN: ${{ secrets.DAGSHUB_TOKEN }}
         MLFLOW_TRACKING_USERNAME: atharvaprabhu6
@@ -107,7 +107,7 @@ jobs:
     
     - name: Regenerate predictions with new champion model
       env:
-        MLFLOW_TRACKING_URI: https://dagshub.com/atharvaprabhu6/mlops-energy.mlflow
+        MLFLOW_TRACKING_URI: https://dagshub.com/atharvaprabhu6/mlops-energy-dagshub.mlflow/
         MLFLOW_TRACKING_USERNAME: atharvaprabhu6
         MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
       run: python src/scripts/run_predictions.py
