@@ -48,7 +48,7 @@ jobs:
     
     - name: Generate predictions
       env:
-        MLFLOW_TRACKING_URI: https://dagshub.com/atharvaprabhu6/mlops-energy-dagshub.mlflow/
+        MLFLOW_TRACKING_URI: https://dagshub.com/atharvaprabhu6/mlops-energy-dagshub.mlflow
         MLFLOW_TRACKING_USERNAME: atharvaprabhu6
         MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
       run: python src/scripts/run_predictions.py
