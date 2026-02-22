@@ -97,12 +97,17 @@ def train_model(
         }).sort_values("importance", ascending=False)
         mlflow.log_text(importance_df.to_csv(index=False), "feature_importance.csv")
 
-        # Log model to MLflow
-        mlflow.lightgbm.log_model(
-            model,
-            artifact_path="model",
-            registered_model_name=MODEL_NAME,
-        )
+        # Log model to MLflow — try registering, fall back to artifact-only if registry unavailable
+        try:
+            mlflow.lightgbm.log_model(
+                model,
+                artifact_path="model",
+                registered_model_name=MODEL_NAME,
+            )
+            print("Model logged and registered in Model Registry.")
+        except Exception as e:
+            print(f"Model Registry unavailable ({e}) — logging model as artifact only.")
+            mlflow.lightgbm.log_model(model, artifact_path="model")
 
         print(f"\n{'='*60}")
         print(f"Run ID: {run.info.run_id}")
